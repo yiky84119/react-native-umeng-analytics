@@ -1,0 +1,29 @@
+{
+  "name": "react-native-umeng-analytics-nevo",
+  "version": "1.0.1",
+  "description": "UMeng Analytics React Native Plugin for iOS.",
+  "keywords": [
+    "umeng-analytics"
+  ],
+  "homepage": "https://github.com/yiky84119/react-native-umeng-analytics.git",
+  "bugs": {
+    "url": "https://github.com/yiky84119/react-native-umeng-analytics/issues"
+  },
+  "license": "MIT",
+  "author": "Nevo <nevo.lee@gmail.com>",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yiky84119/react-native-umeng-analytics.git"
+  },
+  "scripts": {
+    "format": "prettier --write --no-semi --single-quote --trailing-comma all ./index.js "
+  },
+  "devDependencies": {
+    "react": "16.0.0",
+    "react-native": "^0.45.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
