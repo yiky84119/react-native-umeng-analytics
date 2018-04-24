@@ -8,8 +8,8 @@ export default class Analytics {
     static onEvent(eventname){
         UMAnalyticsModule.onEvent(eventname);
     }
-    static onEventWithLable(eventname, label){
-        UMAnalyticsModule.onEventWithLable(eventname, label);
+    static onEventWithLabel(eventname, label){
+        UMAnalyticsModule.onEventWithLabel(eventname, label);
     }
     static onEventWithMap(eventname, jsonData){
         UMAnalyticsModule.onEventWithMap(eventname, jsonData);
@@ -36,11 +36,11 @@ export default class Analytics {
 
     static onPageBegin(pageName) {
         //UMAnalyticsModule.onPageBegin(pageName);
-        UMAnalyticsModule.onEventWithLable(pageName, "1");
+        UMAnalyticsModule.onEventWithLabel(pageName, "1");
     }
 
     static onPageEnd(pageName) {
         //UMAnalyticsModule.onPageEnd(pageName);
-        UMAnalyticsModule.onEventWithLable(pageName, "0");
+        UMAnalyticsModule.onEventWithLabel(pageName, "0");
     }
 }
