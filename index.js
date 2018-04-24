@@ -35,10 +35,12 @@ export default class Analytics {
     }
 
     static onPageBegin(pageName) {
-        UMAnalyticsModule.onPageBegin(pageName);
+        //UMAnalyticsModule.onPageBegin(pageName);
+        UMAnalyticsModule.onEventWithLable(pageName, "1");
     }
 
     static onPageEnd(pageName) {
-        UMAnalyticsModule.onPageEnd(pageName);
+        //UMAnalyticsModule.onPageEnd(pageName);
+        UMAnalyticsModule.onEventWithLable(pageName, "0");
     }
 }
