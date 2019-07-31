@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import org.json.JSONObject;
+import org.json.JSONException;
+import java.util.Iterator;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -16,16 +18,18 @@ import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableNativeMap;
 import com.facebook.react.bridge.ReadableType;
 import com.umeng.analytics.MobclickAgent;
-import com.umeng.analytics.dplus.UMADplus;
-import com.umeng.analytics.game.UMGameAgent;
 
 /**
+ * 示例： SDK 接口桥接封装类，并未封装SDK所有API(仅封装常用API接口)，设置配置参数类API应在Android原生代码
+ * 调用，例如：SDK初始化函数，Log开关函数，子进程自定义事件埋点使能函数，异常捕获功能使能/关闭函数等等。
+ * 如果还需要封装其它SDK API，请参考本例自行封装
  * Created by wangfei on 17/8/28.
+ * -- 适配海棠版(common 2.0.0 + analytics 8.0.0) modify by yujie on 18/12/28
  */
 
 public class AnalyticsModule extends ReactContextBaseJavaModule {
     private ReactApplicationContext context;
-    private boolean isGameInited = false;
+
     public AnalyticsModule(ReactApplicationContext reactContext) {
         super(reactContext);
         context = reactContext;
@@ -35,25 +39,20 @@ public class AnalyticsModule extends ReactContextBaseJavaModule {
     public String getName() {
         return "UMAnalyticsModule";
     }
-    @ReactMethod
-    private void initGame() {
-        UMGameAgent.init(context);
-        UMGameAgent.setPlayerLevel(1);
-        MobclickAgent.setScenarioType(context, MobclickAgent.EScenarioType.E_UM_GAME);
-        isGameInited = true;
-    }
+
     /********************************U-App统计*********************************/
     @ReactMethod
-    public void onPageBegin(String mPageName) {
+    public void onPageStart(String pageName) {
+        //android.util.Log.e("xxxxxx","onPageStart="+mPageName);
 
-        MobclickAgent.onPageStart(mPageName);
-
+        MobclickAgent.onPageStart(pageName);
     }
 
     @ReactMethod
-    public void onPageEnd(String mPageName) {
+    public void onPageEnd(String pageName) {
+        //android.util.Log.e("xxxxxx","onPageEnd="+mPageName);
 
-        MobclickAgent.onPageEnd(mPageName);
+        MobclickAgent.onPageEnd(pageName);
 
     }
     @ReactMethod
@@ -61,11 +60,11 @@ public class AnalyticsModule extends ReactContextBaseJavaModule {
         MobclickAgent.onEvent(context, eventId);
     }
     @ReactMethod
-    public void onEventWithLabel(String eventId,String eventLabel) {
+    public void onEventWithLabel(String eventId, String eventLabel) {
         MobclickAgent.onEvent(context, eventId, eventLabel);
     }
     @ReactMethod
-    public void onEventWithMap(String eventId,ReadableMap map) {
+    public void onEventWithMap(String eventId, ReadableMap map) {
         Map<String, String> rMap = new HashMap<String, String>();
         ReadableMapKeySetIterator iterator = map.keySetIterator();
         while (iterator.hasNextKey()) {
@@ -104,13 +103,9 @@ public class AnalyticsModule extends ReactContextBaseJavaModule {
         }
         MobclickAgent.onEventValue(context, eventId, rMap, value);
     }
-    /********************************U-App(Game)统计*********************************/
+
     @ReactMethod
-    public void track(String eventName) {
-        UMADplus.track(context,eventName);
-    }
-    @ReactMethod
-    public void trackWithMap(String eventID,ReadableMap property) {
+    public void onEventObject(String eventID, ReadableMap property) {
         Map<String, Object> map = new HashMap();
         ReadableMapKeySetIterator iterator = property.keySetIterator();
         while (iterator.hasNextKey()) {
@@ -128,41 +123,41 @@ public class AnalyticsModule extends ReactContextBaseJavaModule {
             }
         }
 
-        UMADplus.track(context, eventID, map);
+        MobclickAgent.onEventObject(context, eventID, map);
 
     }
     @ReactMethod
-    public void registerSuperProperty(ReadableMap map) {
+    public void registerPreProperties(ReadableMap map) {
         ReadableNativeMap map2 = (ReadableNativeMap) map;
         Map<String, Object> map3  = map2.toHashMap();
-        for (String key:map3.keySet()){
-            UMADplus.registerSuperProperty(context, key, map3.get(key));
+        Iterator entries = map3.entrySet().iterator();
+        JSONObject json = new JSONObject();
+        while (entries.hasNext()) {
+            Map.Entry entry = (Map.Entry) entries.next();
+            String key = (String)entry.getKey();
+            String value = (String)entry.getValue();
+            try {
+                json.put(key,value);
+            }catch (JSONException e){
+
+            }
         }
-
+        MobclickAgent.registerPreProperties(context,json);
     }
     @ReactMethod
-    public void unregisterSuperProperty(String propertyName) {
-        UMADplus.unregisterSuperProperty(context, propertyName);
-
-    }
-    @ReactMethod
-    public void getSuperProperty(String propertyName, Callback callback) {
-        try {
-            String result = UMADplus.getSuperProperty(context, propertyName).toString();
-            callback.invoke(result);
-        } catch (Exception e) {
-        }
+    public void unregisterPreProperty(String propertyName) {
+        MobclickAgent.unregisterPreProperty(context, propertyName);
 
     }
 
     @ReactMethod
-    public void getSuperProperties(Callback callback) {
-        String result = UMADplus.getSuperProperties(context);
+    public void getPreProperties(Callback callback) {
+        String result = MobclickAgent.getPreProperties(context).toString();
         callback.invoke(result);
     }
     @ReactMethod
-    public void clearSuperProperties() {
-        UMADplus.clearSuperProperties(context);
+    public void clearPreProperties() {
+        MobclickAgent.clearPreProperties(context);
 
     }
     @ReactMethod
@@ -181,7 +176,7 @@ public class AnalyticsModule extends ReactContextBaseJavaModule {
                 list.add(array.getMap(i).toString());
             }
         }
-        UMADplus.setFirstLaunchEvent(context, list);
+        MobclickAgent.setFirstLaunchEvent(context, list);
     }
     /********************************U-Dplus*********************************/
     @ReactMethod
@@ -191,8 +186,8 @@ public class AnalyticsModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     @SuppressWarnings("unused")
-    public void profileSignInWithPUIDWithProvider(String puid, String provider) {
-        MobclickAgent.onProfileSignIn(puid, provider);
+    public void profileSignInWithPUIDWithProvider(String provider, String puid) {
+        MobclickAgent.onProfileSignIn(provider, puid);
     }
 
     @ReactMethod
@@ -201,103 +196,4 @@ public class AnalyticsModule extends ReactContextBaseJavaModule {
         MobclickAgent.onProfileSignOff();
     }
 
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void setUserLevelId(int level) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.setPlayerLevel(level);
-    }
-
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void startLevel(String level) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.startLevel(level);
-    }
-
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void failLevel(String level) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.failLevel(level);
-    }
-
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void finishLevel(String level) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.finishLevel(level);
-    }
-
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void exchange(double currencyAmount, String currencyType, double virtualAmount, int channel,
-                         String orderId) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.exchange(currencyAmount, currencyType, virtualAmount, channel, orderId);
-    }
-
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void pay(double money, double coin, int source) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.pay(money, coin, source);
-    }
-
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void payWithItem(double money, String item, int number, double price, int source) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.pay(money, item, number, price, source);
-    }
-
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void buy(String item, int number, double price) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.buy(item, number, price);
-    }
-
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void use(String item, int number, double price) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.use(item, number, price);
-    }
-
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void bonus(double coin, int source) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.bonus(coin, source);
-    }
-
-    @ReactMethod
-    @SuppressWarnings("unused")
-    public void bonusWithItem(String item, int number, double price, int source) {
-        if (!isGameInited) {
-            initGame();
-        }
-        UMGameAgent.bonus(item, number, price, source);
-    }
 }
