@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 
   s.vendored_frameworks = "ios/UMAnalytics/framework/UMAnalytics.framework", "ios/UMAnalytics/framework/UMCommon.framework"
   s.frameworks = "CoreTelephony", "SystemConfiguration"
-  s.libraries = "sqlite", "z"
+  s.libraries = "sqlite3", "z"
 
   s.dependency 'React'
 end
