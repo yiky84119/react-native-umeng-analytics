@@ -36,7 +36,6 @@ public class MainActivity extends ReactActivity {
 pod install
 ```
 
-```
 * init module (in AppDelegate.m)
 
 ```object c
