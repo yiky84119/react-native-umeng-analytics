@@ -38,7 +38,7 @@ pod install
 
 * init module (in AppDelegate.m)
 
-```objectc
+```oc
 ...
 
 #import "RNUMConfigure.h"
