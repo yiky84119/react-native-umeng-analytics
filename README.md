@@ -17,7 +17,7 @@ yarn add react-native-umeng-analytics-nevo
 
 import com.umengs.analytics.RNUMConfigure;
 
-public class MainActivity extends ReactActivity {
+public class MainApplication extends Application {
 
     ...
 
