@@ -43,14 +43,9 @@ pod install
 
 #import "RNUMConfigure.h"
 
-public class MainActivity extends ReactActivity {
-
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     ...
-
-    - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-        ...
-        [RNUMConfigure initWithAppkey:@"xxxxx" channel:@"AppleStore"];
-    }
+    [RNUMConfigure initWithAppkey:@"xxxxx" channel:@"AppleStore"];
 }
 ```
 
